@@ -1,0 +1,68 @@
+.root-win{
+    background-color: antiquewhite;
+    position: absolute;
+    top: 0;
+    user-select: none;
+}
+
+.win-header{
+    display: flex;
+    justify-content:space-between;
+    align-items: center;
+    height: 30px;
+    background-color: rgb(77, 77, 77);
+    width: 100%;
+}
+.win-opts{
+    display: flex;
+    width: 50px;
+    gap: 10px;
+    margin-right: 10px;
+}
+.win-ico{
+    background-color: black;
+    border-radius: 5px;
+    width: 10px;
+    height: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.win-content{
+    border: 1px solid grey;
+    border-top: none;
+    display: flex;
+    height: calc(100% - 30px);
+    overflow: hidden;
+}
+
+.header-content{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.h-cont-btn:hover{
+    background-color: rgb(34, 60, 60);
+    /* display: flex; */
+    position: relative;
+}
+
+.h-cont-btn:hover .h-cont-dropdown {
+  display: block;
+}
+.h-cont-btn{
+    position: relative;
+     cursor: pointer;
+}
+.h-cont-dropdown span {
+  display: block;
+}
+.h-cont-dropdown{
+    display: none;
+    position: absolute;
+    top: 100%;
+      left: 0;
+     min-width: 90px;
+    /* height: 200px; */
+    background-color: red;
+}

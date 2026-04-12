@@ -1,0 +1,41 @@
+.taskbar-main{
+     position: absolute;
+    right: 0;
+    margin-top: 50px;
+    width: 50px;
+    height: calc(100vh - 100px);
+    color: white;
+    z-index: 1000;
+    background-color: #b0aaaa;
+    border-top-left-radius: 35px;
+    border-bottom-left-radius: 35px;
+
+}
+
+.tb-icon{
+    background-color: black;
+    border-radius: 11px;
+    width: 33px;
+    height: 33px;
+}
+.tb-items{
+    display: flex;
+    /* padding:5px; */
+    flex-direction: column;
+    /* gap:25px; */
+    align-items: center;
+    margin-top: 80px;
+}
+.tb-item-box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 80px;
+    /* background-color: # */
+}
+.tb-item-box:hover{
+    background-color: #cdc7c7;
+    border-bottom: 1px solid red;
+    border-top: 1px solid red;
+}

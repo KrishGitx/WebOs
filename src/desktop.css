@@ -1,0 +1,45 @@
+.main-area{
+    flex: 1; /* takes remaining space */
+  background-image: url('./assets/2.jpg');
+  background-size: cover;
+}
+.icons-pack{
+    padding: 20px;
+    display:flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap:30px;
+    height: 99vh;
+      align-content: baseline;
+}
+.desktop-root {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+.imgBox{
+    width: 50px;
+    height: 50px;
+    background: #000;
+    justify-self:center;
+    margin-bottom: 5px;
+    border-radius: 7px;
+    
+}
+
+.ico-txt{
+    color:white;
+    font-size: 14px;
+    text-align: center;
+    
+}
+.ico-box{
+    align-content: center;
+    width: 80px;
+    height:100px;
+}
+
+.ico-box:hover{
+    background-color: rgba(188, 59, 59, 0.48);
+}

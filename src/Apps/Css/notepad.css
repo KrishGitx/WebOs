@@ -1,0 +1,43 @@
+.app-nt-pad-main{
+    background-color: white;
+    width: 100%;
+    height: calc(100%-30px);
+    color:black;
+}
+
+#nt-text{
+    background-color: rgb(19, 19, 19);
+    border:none;
+    outline: none;
+    color: rgb(255, 255, 255);
+    width: 100%; 
+     height: 100%;
+    padding: 10px;
+    font-size: 16px;
+    line-height: 1.4;
+    resize: none;
+}
+
+.npad-header{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+    background-color: rgb(77, 77, 77);
+}
+.h-cont{
+    display: flex;
+    gap: 10px;
+}
+
+.nt-find{
+    display: block;
+    position: absolute;
+    right: 0;
+    left: 12;
+    bottom: 12;
+    background-color: red;
+    width: 100px;
+    height: 50px;
+    z-index:10000;
+}
