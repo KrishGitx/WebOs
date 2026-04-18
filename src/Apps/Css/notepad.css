@@ -11,8 +11,8 @@
     outline: none;
     color: rgb(255, 255, 255);
     width: 100%; 
-     height: 100%;
-    padding: 10px;
+     height: calc(100% - 1px);
+    /* padding: 10px; */
     font-size: 16px;
     line-height: 1.4;
     resize: none;
@@ -33,11 +33,24 @@
 .nt-find{
     display: block;
     position: absolute;
-    right: 0;
-    left: 12;
-    bottom: 12;
-    background-color: red;
-    width: 100px;
-    height: 50px;
+    right: 1%;
+    top: 10%;
+
+    width: 12%;
+    min-width: 124px;
+    height: 40px;
     z-index:10000;
+}
+.nt-find-input{
+    width: calc(100% - 8px);
+    height: 100%;
+
+
+}
+.nt-find-close-btn{
+    position: absolute;
+    right:7%;
+    color:  red;
+    margin-top: 3%;
+    z-index: 10000;
 }
