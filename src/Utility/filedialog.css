@@ -1,0 +1,33 @@
+.dialog-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-top: 1px solid #333;
+}
+
+.dialog-actions button {
+  margin-left: 10px;
+}
+
+.dialog-info {
+  color: #aaa;
+}
+.dialog-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.explorer {
+  flex: 1;
+  overflow: auto;
+}
+
+.dialog-footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background: #111;
+  border-top: 1px solid #333;
+}

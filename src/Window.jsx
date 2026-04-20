@@ -9,18 +9,17 @@ function Window({
   activeApp,
   setActiveWindowId,
   activeWindowId,
+  openApp,
+  bringToFront,
 }) {
   const ActiveApp = apps[app.name];
 
   console.log("APPSS:", activeApp);
 
-  const bringToFront = (id) => {
-    setActiveWindowId(id);
-  };
 
   const [size, setSize] = useState({
-    width: "300px",
-    height: "200px",
+    width: "700px",
+    height: "700px",
   });
   const [Pos, setPos] = useState({
     top: "100px",
@@ -110,7 +109,7 @@ function Window({
         bottom: Pos.bottom,
         width: size.width,
         height: size.height,
-        zIndex: app.id === activeWindowId ? 10 : 1,
+        zIndex:  app.zIndex,
       }}
     >
       <div
@@ -145,6 +144,7 @@ function Window({
                       key={drp}
                       onClick={() => {
                         setHeaderOption(drp);
+                        setDropdownActive(false);
                       }}
                     >
                       {drp}
@@ -194,9 +194,13 @@ function Window({
       >
         {ActiveApp && (
           <ActiveApp
-            key={app.id}
+            {...app.props}
+            closeWindow={() =>
+              setActiveApp((prev) => prev.filter((a) => a.id !== app.id))
+            }
             setHeaderContent={setHeaderContent}
             headerOption={headerOption}
+            openApp={openApp} 
           />
         )}
       </div>

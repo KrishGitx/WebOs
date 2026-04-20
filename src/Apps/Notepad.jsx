@@ -3,31 +3,97 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import "./Css/notepad.css";
 
-function Notepad({ setHeaderContent, headerOption }) {
+function Notepad({ setHeaderContent, headerOption, openApp,filePath: initialPath }) {
   const quillRef = useRef();
 
   const [findBox, setFindBox] = useState(false);
-  useEffect(() => {
-    if (headerOption === "Find") {
-      setFindBox(true);
-      console.log("fsdfds", findBox);
-    }
-  }, [headerOption]);
+  const [filePath, setFilePath] = useState(null);
+  
 
-  const [findText, setFindText] = useState();
+  useEffect(() => {
+  if (initialPath) {
+    console.log(initialPath);
+    loadFile(initialPath);
+  }
+}, [initialPath]);
+
+  useEffect(() => {
+  if (!headerOption) return;
+
+  switch (headerOption) {
+    case "Find":
+      setFindBox(true);
+      break;
+    case "Save":
+      handleSave();
+      break;
+    case "Open":
+      handleOpen();
+      break;
+    case "New":
+      setValue("");
+      setFilePath(null);
+      break;
+    case "Save As":
+      handleSaveAs();
+      break;
+  }
+}, [headerOption]);
+
   const [value, setValue] = useState("");
 
   useEffect(() => {
     setHeaderContent({
-      File: ["New", "Open"],
+      File: ["New", "Open", "Save", "Save As"],
       Edit: ["Find", "Search"],
       View: ["Nice", "Bad"],
       Help: ["No helps avail"],
     }); // ✅ FIXED
   }, []);
 
+  function handleOpen() {
+    openApp("fileDialog", {
+      mode: "open",
+      onSelect: (path) => {
+        loadFile(path);
+      },
+    });
+  }
+
+  function handleSave() {
+    if (!initialPath) {
+      handleSaveAs();
+      return;
+    }
+
+    saveFile(initialPath);
+  }
+
+  function handleSaveAs() {
+    openApp("fileDialog", {
+      mode: "save",
+      onSelect: (path) => {
+        setFilePath(path);
+        saveFile(path);
+      },
+    });
+  }
+ 
+  function saveFile(path) {
+    const formData = new FormData();
+    formData.append("path", path);
+    formData.append("content", value);
+
+    fetch("http://localhost/miniOS/backend/save.php", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => console.log("Saved:", data))
+      .catch((err) => console.error(err));
+  }
+
   function searchText(textInput) {
-    
     const quill = quillRef.current.getEditor();
     quill.formatText(0, quill.getLength(), {
       background: null,
@@ -47,6 +113,17 @@ function Notepad({ setHeaderContent, headerOption }) {
       index = text.indexOf(search, index + search.length);
     }
   }
+
+function loadFile(path) {
+  fetch(`http://localhost/miniOS/backend/read.php?path=${path}`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.error) return;
+
+      setValue(data.content);
+      setFilePath(path); // 🔥 THIS MUST EXIST
+    });
+}
 
   return (
     <>
@@ -74,7 +151,6 @@ function Notepad({ setHeaderContent, headerOption }) {
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 const val = e.target.value;
-                setFindText(val);
                 searchText(val);
               }
             }}
@@ -87,14 +163,8 @@ function Notepad({ setHeaderContent, headerOption }) {
           onChange={setValue}
           ref={quillRef}
         />
-        {/* <textarea name="txt" id="nt-text"></textarea> */}
       </div>
     </>
   );
 }
 export default Notepad;
-
-// contenteditable div (like real editors)
-// or libraries like:
-// react-quill
-// draft-js
