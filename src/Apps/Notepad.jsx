@@ -3,52 +3,145 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import "./Css/notepad.css";
 
-function Notepad({ setHeaderContent, headerOption, openApp,filePath: initialPath }) {
+function Notepad({
+  setHeaderContent,
+  headerOption,
+  openApp,
+  filePath: initialPath,
+}) {
   const quillRef = useRef();
 
   const [findBox, setFindBox] = useState(false);
   const [filePath, setFilePath] = useState(null);
-  
-
-  useEffect(() => {
-  if (initialPath) {
-    console.log(initialPath);
-    loadFile(initialPath);
-  }
-}, [initialPath]);
-
-  useEffect(() => {
-  if (!headerOption) return;
-
-  switch (headerOption) {
-    case "Find":
-      setFindBox(true);
-      break;
-    case "Save":
-      handleSave();
-      break;
-    case "Open":
-      handleOpen();
-      break;
-    case "New":
-      setValue("");
-      setFilePath(null);
-      break;
-    case "Save As":
-      handleSaveAs();
-      break;
-  }
-}, [headerOption]);
-
   const [value, setValue] = useState("");
+
+  function loadFile(path) {
+    fetch(`http://localhost/miniOS/backend/read.php?path=${path}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) return;
+
+        setValue(data.content);
+        setFilePath(path); // 🔥 THIS MUST EXIST
+      });
+  }
+  useEffect(() => {
+    if (initialPath) {
+      console.log(initialPath);
+      loadFile(initialPath);
+    }
+  }, [initialPath]);
+
+  useEffect(() => {
+    if (!headerOption) return;
+
+    switch (headerOption) {
+      case "Find":
+        setFindBox(true);
+        break;
+      case "Save":
+        handleSave();
+        break;
+      case "Open":
+        handleOpen();
+        break;
+      case "New":
+        setValue("");
+        setFilePath(null);
+        setFindBox(false);
+        break;
+      case "Save As":
+        handleSaveAs();
+        break;
+      case "Select All": {
+        const quill = quillRef.current.getEditor();
+        quill.setSelection(0, quill.getLength());
+        break;
+      }
+      case "Undo": {
+        const quill = quillRef.current.getEditor();
+        quill.history.undo();
+        break;
+      }
+      case "Redo": {
+        const quill = quillRef.current.getEditor();
+        quill.history.redo();
+        break;
+      }
+      case "Exit":
+        // call closeWindow if you pass it
+        break;
+    }
+  }, [headerOption]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!e.ctrlKey) return;
+
+      const key = e.key.toLowerCase();
+
+      switch (key) {
+        case "o": // Ctrl + O
+          e.preventDefault();
+          handleOpen();
+          break;
+
+        case "s": // Ctrl + S
+          e.preventDefault();
+          handleSave();
+          break;
+
+        case "f": // Ctrl + F
+          e.preventDefault();
+          setFindBox(true);
+          break;
+
+        case "n": // Ctrl + N
+          e.preventDefault();
+          setValue("");
+          setFilePath(null);
+          break;
+
+        case "a": {
+          // Ctrl + A
+          e.preventDefault();
+          const quill = quillRef.current.getEditor();
+          quill.setSelection(0, quill.getLength());
+          break;
+        }
+
+        case "z": {
+          // Ctrl + Z
+          e.preventDefault();
+          const quill = quillRef.current.getEditor();
+          quill.history.undo();
+          break;
+        }
+
+        case "y": {
+          // Ctrl + Y
+          e.preventDefault();
+          const quill = quillRef.current.getEditor();
+          quill.history.redo();
+          break;
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [value, filePath]);
 
   useEffect(() => {
     setHeaderContent({
-      File: ["New", "Open", "Save", "Save As"],
-      Edit: ["Find", "Search"],
-      View: ["Nice", "Bad"],
-      Help: ["No helps avail"],
-    }); // ✅ FIXED
+      File: ["New", "Open", "Save", "Save As", "Exit"],
+      Edit: ["Undo", "Redo", "Cut", "Copy", "Paste", "Find", "Select All"],
+      View: ["Word Wrap"],
+      Help: ["About"],
+    });
   }, []);
 
   function handleOpen() {
@@ -78,7 +171,7 @@ function Notepad({ setHeaderContent, headerOption, openApp,filePath: initialPath
       },
     });
   }
- 
+
   function saveFile(path) {
     const formData = new FormData();
     formData.append("path", path);
@@ -113,17 +206,6 @@ function Notepad({ setHeaderContent, headerOption, openApp,filePath: initialPath
       index = text.indexOf(search, index + search.length);
     }
   }
-
-function loadFile(path) {
-  fetch(`http://localhost/miniOS/backend/read.php?path=${path}`)
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.error) return;
-
-      setValue(data.content);
-      setFilePath(path); // 🔥 THIS MUST EXIST
-    });
-}
 
   return (
     <>

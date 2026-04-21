@@ -7,6 +7,8 @@ import Notepad from "./Apps/Notepad.jsx";
 import Settings from "./Apps/Settings.jsx";
 import ThisPC from "./Apps/Explorer.jsx";
 import FileDialog from "./Utility/FileDialog.jsx";
+import ImageViewer from "./Apps/ImageViewer.jsx";
+import Paint from "./Apps/Paint.jsx";
 
 function Desktop() {
   const [activeWindowId, setActiveWindowId] = useState(null);
@@ -22,6 +24,8 @@ function Desktop() {
     settings: Settings,
     thispc: ThisPC,
     fileDialog: FileDialog,
+    imageViewer: ImageViewer,
+    paint: Paint,
   };
 
   function openApp(name, props = {}) {
@@ -56,11 +60,17 @@ function Desktop() {
     });
   }
 
-  let desktopApps = ["notepad", "settings", "thispc"];
+  let desktopApps = ["notepad", "settings", "thispc", "paint"]; //Fetch From backend
 
   return (
     <>
-      <Tb />
+      <Tb
+        activeApp={activeApp}
+        openApp={openApp}
+        bringToFront={bringToFront}
+        taskbarApps={desktopApps}
+        allApps={apps}
+      />
 
       {activeApp &&
         activeApp.map((appx) => (

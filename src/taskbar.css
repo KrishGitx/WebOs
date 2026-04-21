@@ -1,41 +1,433 @@
-.taskbar-main{
-     position: absolute;
+/* ═══════════════════════════════════════════════════════════════
+   TASKBAR — right-side vertical bar that physically expands left
+   when the app drawer is opened (the whole bar moves as one unit)
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+    --tb-rail-w: 64px;
+    --tb-drawer-w: 340px;
+    --tb-total-w: calc(var(--tb-rail-w) + var(--tb-drawer-w));
+    --tb-bg: rgba(13, 13, 18, 0.82);
+    --tb-blur: blur(24px) saturate(1.5);
+    --tb-border: rgba(255, 255, 255, 0.07);
+    --tb-accent: #7dd3fc;
+    --tb-text: #e2e8f0;
+    --tb-sub: rgba(255, 255, 255, 0.4);
+    --tb-radius: 10px;
+    --tb-ease: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* ── Root container ──────────────────────────────────────────── */
+.taskbar {
+    position: fixed;
+    top: 0;
     right: 0;
-    margin-top: 50px;
-    width: 50px;
-    height: calc(100vh - 100px);
-    color: white;
-    z-index: 1000;
-    background-color: #b0aaaa;
-    border-top-left-radius: 35px;
-    border-bottom-left-radius: 35px;
+    /* Start collapsed: only the rail is visible */
+    width: var(--tb-rail-w);
+    height: 100vh;
+    z-index: 9999;
 
-}
-
-.tb-icon{
-    background-color: black;
-    border-radius: 11px;
-    width: 33px;
-    height: 33px;
-}
-.tb-items{
     display: flex;
-    /* padding:5px; */
+    flex-direction: row; /* drawer on left, rail on right */
+    align-items: stretch;
+
+    /* THE KEY: the whole taskbar slides left when drawer opens */
+    transform: translateX(0);
+    transition:
+        width 0.35s var(--tb-ease),
+        transform 0.35s var(--tb-ease);
+
+    background: var(--tb-bg);
+    backdrop-filter: var(--tb-blur);
+    -webkit-backdrop-filter: var(--tb-blur);
+    border-left: 1px solid var(--tb-border);
+    box-shadow: -6px 0 32px rgba(0, 0, 0, 0.45);
+}
+
+/* When drawer is open, the taskbar grows to include drawer width */
+.taskbar.drawer-open {
+    width: var(--tb-total-w);
+}
+
+/* ── Rail (always-visible right strip) ───────────────────────── */
+.tb-rail {
+    width: var(--tb-rail-w);
+    flex-shrink: 0;
+    display: flex;
     flex-direction: column;
-    /* gap:25px; */
     align-items: center;
-    margin-top: 80px;
+    padding: 10px 0 14px;
+    gap: 4px;
+    border-left: 1px solid var(--tb-border);
+    height: 100%;
+    box-sizing: border-box;
 }
-.tb-item-box{
+
+/* ── Drawer panel (left of rail) ─────────────────────────────── */
+.tb-drawer {
+    flex: 1; /* fills remaining width (0 when closed, drawer-w when open) */
+    overflow: hidden;
+    height: 100%;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 80px;
-    /* background-color: # */
+    flex-direction: column;
 }
-.tb-item-box:hover{
-    background-color: #cdc7c7;
-    border-bottom: 1px solid red;
-    border-top: 1px solid red;
+
+.tb-drawer-inner {
+    width: var(--tb-drawer-w);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    box-sizing: border-box;
+
+    /* Drawer content slides in from the right */
+    transform: translateX(var(--tb-drawer-w));
+    opacity: 0;
+    transition:
+        transform 0.35s var(--tb-ease),
+        opacity 0.2s ease;
+}
+
+.taskbar.drawer-open .tb-drawer-inner {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* ── Drawer header ───────────────────────────────────────────── */
+.tb-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px 14px;
+}
+
+.tb-drawer-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--tb-text);
+    font-family: "Segoe UI", system-ui, sans-serif;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.tb-drawer-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    border: none;
+    background: rgba(255, 255, 255, 0.07);
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+
+.tb-drawer-close:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+}
+
+/* ── Search ──────────────────────────────────────────────────── */
+.tb-search-wrap {
+    position: relative;
+    margin: 0 16px 16px;
+}
+
+.tb-search-ico {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--tb-sub);
+    font-size: 16px;
+    pointer-events: none;
+    line-height: 1;
+}
+
+.tb-search {
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 9px;
+    padding: 9px 12px 9px 34px;
+    color: var(--tb-text);
+    font-size: 13px;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    outline: none;
+    transition:
+        border-color 0.15s,
+        background 0.15s;
+}
+
+.tb-search:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(125, 211, 252, 0.4);
+}
+
+.tb-search::placeholder {
+    color: var(--tb-sub);
+}
+
+/* ── App grid ────────────────────────────────────────────────── */
+.tb-app-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 0 16px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.tb-app-grid::-webkit-scrollbar {
+    width: 4px;
+}
+.tb-app-grid::-webkit-scrollbar-track {
+    background: transparent;
+}
+.tb-app-grid::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 2px;
+}
+
+.tb-app-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 14px 6px;
+    border-radius: 11px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    color: var(--tb-text);
+    transition:
+        background 0.15s,
+        transform 0.15s,
+        border-color 0.15s;
+}
+
+.tb-app-tile:hover {
+    background: rgba(255, 255, 255, 0.11);
+    border-color: rgba(255, 255, 255, 0.14);
+    transform: scale(1.04);
+}
+
+.tb-app-tile:active {
+    transform: scale(0.97);
+}
+
+.tb-app-tile-letter {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: rgba(125, 211, 252, 0.15);
+    border: 1px solid rgba(125, 211, 252, 0.2);
+    color: var(--tb-accent);
+    font-size: 17px;
+    font-weight: 700;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tb-app-tile-name {
+    font-size: 10.5px;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.65);
+    text-align: center;
+    line-height: 1.2;
+    text-transform: capitalize;
+}
+
+.tb-no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--tb-sub);
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 13px;
+    padding: 28px 0;
+    margin: 0;
+}
+
+/* ── Rail elements ───────────────────────────────────────────── */
+
+/* Win button */
+.tb-win-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--tb-radius);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    transition:
+        background 0.15s,
+        box-shadow 0.15s;
+    flex-shrink: 0;
+}
+
+.tb-win-btn:hover {
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.tb-win-btn.active {
+    background: rgba(125, 211, 252, 0.18);
+    box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.3) inset;
+}
+
+/* Divider */
+.tb-divider {
+    width: 32px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.09);
+    border-radius: 1px;
+    flex-shrink: 0;
+    margin: 2px 0;
+}
+
+/* Icon list */
+.tb-icons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    padding: 0 8px;
+    box-sizing: border-box;
+}
+
+/* Tooltip wrapper */
+.tb-icon-wrap {
+    position: relative;
+}
+
+.tb-tooltip {
+    position: absolute;
+    right: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(18, 18, 26, 0.96);
+    color: var(--tb-text);
+    font-size: 12px;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 0.12s;
+    text-transform: capitalize;
+    z-index: 10001;
+}
+
+.tb-icon-wrap:hover .tb-tooltip {
+    opacity: 1;
+}
+
+/* Icon button */
+.tb-icon-btn {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--tb-radius);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    transition:
+        background 0.15s,
+        box-shadow 0.15s;
+}
+
+.tb-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.tb-icon-btn.running {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.tb-icon-btn.top {
+    background: rgba(255, 255, 255, 0.16);
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.22) inset,
+        0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.tb-icon-letter {
+    font-size: 18px;
+    font-weight: 700;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1;
+}
+
+.tb-icon-btn.top .tb-icon-letter {
+    color: #fff;
+}
+
+/* Running dot */
+.tb-run-dot {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.tb-icon-btn.top .tb-run-dot {
+    background: var(--tb-accent);
+}
+
+/* Spacer */
+.tb-spacer {
+    flex: 1;
+}
+
+/* ── Clock ───────────────────────────────────────────────────── */
+.tb-clock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding-bottom: 2px;
+    cursor: default;
+    flex-shrink: 0;
+}
+
+.tb-clock-time {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--tb-text);
+    font-family: "Segoe UI", system-ui, sans-serif;
+    letter-spacing: 0.02em;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+}
+
+.tb-clock-date {
+    font-size: 10px;
+    color: var(--tb-sub);
+    font-family: "Segoe UI", system-ui, sans-serif;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
 }
