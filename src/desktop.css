@@ -1,6 +1,9 @@
+:root {
+  --accent: #2c99c4;}
+
 .main-area{
     flex: 1; /* takes remaining space */
-  background-image: url('./assets/2.jpg');
+  /* background-image: url('./assets/2.jpg'); */
   background-size: cover;
 }
 .icons-pack{
@@ -18,14 +21,13 @@
   width: 100vw;
   overflow: hidden;
 }
-.imgBox{
-    width: 50px;
-    height: 50px;
-    background: #000;
-    justify-self:center;
-    margin-bottom: 5px;
-    border-radius: 7px;
-    
+.imgBox {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 5px;
 }
 
 .ico-txt{

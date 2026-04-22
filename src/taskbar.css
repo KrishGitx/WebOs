@@ -270,6 +270,9 @@
   width:           100%;
   padding:         0 6px;
   box-sizing:      border-box;
+   /* add these two: */
+  overflow: visible;
+  font-size: 0;
 }
 
 .tb-ico-wrap { position: relative; }
@@ -367,4 +370,26 @@
   writing-mode:     vertical-rl;
   text-orientation: mixed;
   transform:        rotate(180deg);
+}
+.tb-ico svg { display: block; }
+.tb-tile-letter { 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tb-ico {
+  position:        relative;
+  width:           38px;
+  height:          38px;
+  border-radius:   var(--r);
+  border:          none;
+  cursor:          pointer;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-size:       0;
+  background:      transparent;
+  transition:      background 0.15s, box-shadow 0.15s;
+  overflow:        visible;
+  padding:         0;
 }

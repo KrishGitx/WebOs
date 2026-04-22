@@ -1,12 +1,52 @@
 import { useState, useEffect, useRef } from "react";
 import "./Window.css";
 
+const CloseIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 12 12">
+    <path
+      d="M1 1 L11 11 M11 1 L1 11"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const MaxIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 12 12">
+    <rect
+      x="1.5"
+      y="1.5"
+      width="9"
+      height="9"
+      stroke="white"
+      strokeWidth="2"
+      fill="none"
+    />
+  </svg>
+);
+
+const MinIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 12 12">
+    <line
+      x1="2"
+      y1="6"
+      x2="10"
+      y2="6"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 function Window({ app, apps, setActiveApp, openApp, bringToFront }) {
   const ActiveApp = apps[app.name];
 
   const windowRef = useRef(null);
   const headerRef = useRef(null);
 
+  const [isMinimized, setIsMinimized] = useState(false);
   // 🪟 Size & Position
   const [size, setSize] = useState({
     width: "700px",
@@ -160,6 +200,22 @@ function Window({ app, apps, setActiveApp, openApp, bringToFront }) {
     }
   };
 
+
+
+useEffect(() => {
+  const handler = (e) => {
+    if (e.detail === app.id) {
+      setIsMinimized(false);
+    }
+  };
+
+  window.addEventListener("restoreWindow", handler);
+
+  return () => {
+    window.removeEventListener("restoreWindow", handler);
+  };
+}, [app.id]);
+
   return (
     <div
       ref={windowRef}
@@ -172,6 +228,7 @@ function Window({ app, apps, setActiveApp, openApp, bringToFront }) {
         width: size.width,
         height: size.height,
         zIndex: app.zIndex,
+        display: isMinimized ? "none" : "block",
       }}
     >
       {/* HEADER */}{" "}
@@ -216,20 +273,25 @@ function Window({ app, apps, setActiveApp, openApp, bringToFront }) {
           </div>
         </div>
         <div className="win-opts">
+          {/* MINIMIZE */}
+          <div className="win-btn" onClick={() => setIsMinimized(true)}>
+            <MinIcon />
+          </div>
+
+          {/* MAXIMIZE */}
+          <div className="win-btn" onClick={toggleMaximize}>
+            <MaxIcon />
+          </div>
+
+          {/* CLOSE */}
           <div
-            className="win-close"
+            className="win-btn close"
             onClick={() =>
               setActiveApp((prev) => prev.filter((a) => a.id !== app.id))
             }
           >
-            X
+            <CloseIcon />
           </div>
-
-          <div className="win-close" onClick={toggleMaximize}>
-            B
-          </div>
-
-          <div className="win-close">M</div>
         </div>
       </div>
       {/* CONTENT */}

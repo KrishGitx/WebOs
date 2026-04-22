@@ -37,7 +37,37 @@ export default function Explorer({
   function getExtension(name) {
     return name.split(".").pop().toLowerCase();
   }
+// add state at top of Explorer:
+const [clipboard, setClipboard] = useState(null); // { item, mode: 'copy'|'cut' }
+const [ctxMenu, setCtxMenu] = useState(null); // { x, y, item }
 
+// close ctx menu on click
+useEffect(() => {
+  const fn = () => setCtxMenu(null);
+  window.addEventListener("click", fn);
+  return () => window.removeEventListener("click", fn);
+}, []);
+
+async function pasteItem() {
+  if (!clipboard) return;
+  const fd = new FormData();
+  fd.append("src", clipboard.item.path);
+  fd.append("dest", currentPath + "/" + clipboard.item.name);
+  const endpoint = clipboard.mode === "copy" ? "copy.php" : "move.php";
+  await fetch(`http://localhost/miniOS/backend/${endpoint}`, { method: "POST", body: fd });
+  if (clipboard.mode === "cut") setClipboard(null);
+  fetchFiles(currentPath);
+  window.dispatchEvent(new CustomEvent("fs:update"));
+}
+
+async function deleteItem(item) {
+  if (!confirm(`Delete ${item.name}?`)) return;
+  const fd = new FormData();
+  fd.append("path", item.path);
+  await fetch("http://localhost/miniOS/backend/delete.php", { method: "POST", body: fd });
+  fetchFiles(currentPath);
+  window.dispatchEvent(new CustomEvent("fs:update"));
+}
   useEffect(() => {
     if (initialPath) {
       setCurrentPath(initialPath);
