@@ -15,7 +15,21 @@ export default function Explorer({
   openApp,
   selected,
   onPathChange,
+  initialPath,
 }) {
+  async function fetchFiles(path) {
+    try {
+      const res = await fetch(
+        `http://localhost/miniOS/backend/list.php?path=${path}`,
+      );
+      const data = await res.json();
+
+      setFiles(data.items || []);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   const [currentPath, setCurrentPath] = useState("/");
   const [history, setHistory] = useState(["/"]);
   const [files, setFiles] = useState([]);
@@ -24,6 +38,12 @@ export default function Explorer({
     return name.split(".").pop().toLowerCase();
   }
 
+  useEffect(() => {
+    if (initialPath) {
+      setCurrentPath(initialPath);
+      fetchFiles(initialPath);
+    }
+  }, [initialPath]);
   const fileTypeMap = {
     txt: "notepad",
     md: "notepad",
@@ -184,7 +204,7 @@ export default function Explorer({
                       } else {
                         onItemClick?.(item);
                       }
-                    } 
+                    }
                   }}
                   onDoubleClick={() => {
                     if (isDialog) {

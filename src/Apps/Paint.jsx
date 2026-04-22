@@ -460,7 +460,7 @@ export default function Paint({ setHeaderContent, headerOption, openApp }) {
           mode: "save",
           defaultExt: ".png",
           onSelect: (path) => {
-            const finalPath = path.endsWith(".png") ? path : path + ".png";
+            const finalPath = path.replace(/\.[^/.]+$/, "") + ".png";
             doSave(finalPath);
             setCurrentFilePath(finalPath);
           },
@@ -485,7 +485,7 @@ export default function Paint({ setHeaderContent, headerOption, openApp }) {
       const fd = new FormData();
       fd.append("path", path);
       fd.append("content", blob, "painting.png");
-      const res = await fetch("http://localhost/miniOS/backend/save.php", {
+      const res = await fetch("http://localhost/miniOS/backend/saveImage.php", {
         method: "POST",
         body: fd,
       });

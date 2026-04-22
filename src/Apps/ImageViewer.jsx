@@ -18,10 +18,13 @@ function ImageViewer({
   const offsetRef = useRef({ x: 0, y: 0 });
 
   // 🔥 TEMP IMAGE
-  useEffect(() => {
-    setImgSrc("/test.jpg");
-  }, []);
+useEffect(() => {
+  if (!filePath) return;
 
+  setImgSrc(
+    `http://localhost/miniOS/backend/readFile.php?path=${filePath}`
+  );
+}, [filePath]);
   // 🧠 Header
   useEffect(() => {
     setHeaderContent({
