@@ -12,12 +12,9 @@ import Terminal from "./Apps/Terminal.jsx";
 import TaskManager from "./Apps/TaskManager.jsx";
 import { loadSettings, applySettings } from "./Apps/Settings.jsx";
 
-
-
-
 function Desktop() {
   const [desktopApps, setDesktopApps] = useState([]);
-const [wallpaper, setWallpaper] = useState(() => loadSettings().wallpaper);
+  const [wallpaper, setWallpaper] = useState(() => loadSettings().wallpaper);
   const [activeWindowId, setActiveWindowId] = useState(null);
   const [zCounter, setZCounter] = useState(1);
   const [activeApp, setActiveApp] = useState([]);
@@ -65,122 +62,195 @@ const [wallpaper, setWallpaper] = useState(() => loadSettings().wallpaper);
       console.error(err);
     }
   }
-useEffect(() => {
-  const s = loadSettings();
-  applySettings(s);
-  const handler = (e) => setWallpaper(e.detail.wallpaper);
-  window.addEventListener("settings:update", handler);
-  return () => window.removeEventListener("settings:update", handler);
-}, []);
+  useEffect(() => {
+    const s = loadSettings();
+    applySettings(s);
+    const handler = (e) => setWallpaper(e.detail.wallpaper);
+    window.addEventListener("settings:update", handler);
+    return () => window.removeEventListener("settings:update", handler);
+  }, []);
   function handleDragStart(e, itemName) {
-  e.preventDefault();
-  
-  const item = desktopApps.find(a => a.name === itemName);
-  const startX = e.clientX - item.x;
-  const startY = e.clientY - item.y;
+    e.preventDefault();
 
-  function onMove(e) {
-    setDesktopApps(prev => prev.map(a =>
-      a.name === itemName ? { ...a, x: e.clientX - startX, y: e.clientY - startY } : a
-    ));
-  }
+    const item = desktopApps.find((a) => a.name === itemName);
+    const startX = e.clientX - item.x;
+    const startY = e.clientY - item.y;
 
-  function onUp(e) {
-    const snappedX = Math.round((e.clientX - startX) / GRID_SIZE) * GRID_SIZE;
-    const snappedY = Math.round((e.clientY - startY) / GRID_SIZE) * GRID_SIZE;
+    function onMove(e) {
+      setDesktopApps((prev) =>
+        prev.map((a) =>
+          a.name === itemName
+            ? { ...a, x: e.clientX - startX, y: e.clientY - startY }
+            : a,
+        ),
+      );
+    }
 
-    setDesktopApps(prev => {
-      const others = prev.filter(a => a.name !== itemName);
-      const occupied = new Set(others.map(a => `${a.x},${a.y}`));
-      let fx = snappedX, fy = snappedY;
-      if (occupied.has(`${fx},${fy}`)) {
-        outer: for (let r = 1; r < 20; r++) {
-          for (let dx = -r; dx <= r; dx++) {
-            for (let dy = -r; dy <= r; dy++) {
-              if (Math.abs(dx) !== r && Math.abs(dy) !== r) continue;
-              const cx = (Math.round(snappedX / GRID_SIZE) + dx) * GRID_SIZE;
-              const cy = (Math.round(snappedY / GRID_SIZE) + dy) * GRID_SIZE;
-              if (cx >= 0 && cy >= 0 && !occupied.has(`${cx},${cy}`)) {
-                fx = cx; fy = cy; break outer;
+    function onUp(e) {
+      const snappedX = Math.round((e.clientX - startX) / GRID_SIZE) * GRID_SIZE;
+      const snappedY = Math.round((e.clientY - startY) / GRID_SIZE) * GRID_SIZE;
+
+      setDesktopApps((prev) => {
+        const others = prev.filter((a) => a.name !== itemName);
+        const occupied = new Set(others.map((a) => `${a.x},${a.y}`));
+        let fx = snappedX,
+          fy = snappedY;
+        if (occupied.has(`${fx},${fy}`)) {
+          outer: for (let r = 1; r < 20; r++) {
+            for (let dx = -r; dx <= r; dx++) {
+              for (let dy = -r; dy <= r; dy++) {
+                if (Math.abs(dx) !== r && Math.abs(dy) !== r) continue;
+                const cx = (Math.round(snappedX / GRID_SIZE) + dx) * GRID_SIZE;
+                const cy = (Math.round(snappedY / GRID_SIZE) + dy) * GRID_SIZE;
+                if (cx >= 0 && cy >= 0 && !occupied.has(`${cx},${cy}`)) {
+                  fx = cx;
+                  fy = cy;
+                  break outer;
+                }
               }
             }
           }
         }
-      }
-      return prev.map(a => a.name === itemName ? { ...a, x: fx, y: fy } : a);
-    });
+        return prev.map((a) =>
+          a.name === itemName ? { ...a, x: fx, y: fy } : a,
+        );
+      });
 
-    window.removeEventListener("mousemove", onMove);
-    window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    }
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
   }
-
-  window.addEventListener("mousemove", onMove);
-  window.addEventListener("mouseup", onUp);
-}
   // ==========================
   // CREATE FOLDER
   // ==========================
   async function createFolder() {
-    const name = prompt("Folder name:");
-    if (!name) return;
+  const name = prompt("Folder name:");
+  if (!name) return;
 
-    const formData = new FormData();
-    formData.append("path", "C:/Desktop");
-    formData.append("name", name);
+  const formData = new FormData();
+  const path = "C:/miniOS_storage/C/Desktop";
 
-    try {
-      await fetch("http://localhost/miniOS/backend/createFolder.php", {
-        method: "POST",
-        body: formData,
-      });
+  formData.append("path", path);
+  formData.append("name", name);
 
+  try {
+    const res = await fetch("http://localhost/miniOS/backend/createFolder.php", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    console.log("SERVER RESPONSE:", data); // 🔥 IMPORTANT
+
+    if (data.success) {
       refreshDesktop();
-    } catch (err) {
-      console.error(err);
+    } else {
+      alert("Error: " + data.error);
     }
 
-    setContextMenu((p) => ({ ...p, visible: false }));
+  } catch (err) {
+    console.error(err);
   }
 
-
-function getIcon(item) {
-  if (item.type === "folder") return (
-    <svg viewBox="0 0 24 24" width="48" height="48" fill="none">
-      <path d="M2 6a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" fill="#ffb86c"/>
-      <path d="M2 9h20v8a2 2 0 01-2 2H4a2 2 0 01-2-2V9z" fill="#ffd09b"/>
-    </svg>
-  );
-
-  const ext = item.name?.split(".").pop().toLowerCase();
-
-  if (["png","jpg","jpeg","gif","webp"].includes(ext)) return (
-    <svg viewBox="0 0 24 24" width="48" height="48" fill="none">
-      <rect x="2" y="2" width="20" height="20" rx="3" fill="#50fa7b" opacity="0.2"/>
-      <rect x="2" y="2" width="20" height="20" rx="3" stroke="#50fa7b" strokeWidth="1.5"/>
-      <circle cx="8.5" cy="8.5" r="1.5" fill="#50fa7b"/>
-      <path d="M2 15l5-5 4 4 3-3 5 5" stroke="#50fa7b" strokeWidth="1.5" strokeLinejoin="round"/>
-    </svg>
-  );
-
-  if (ext === "txt") return (
-    <svg viewBox="0 0 24 24" width="48" height="48" fill="none">
-      <rect x="4" y="2" width="16" height="20" rx="2" fill="#8be9fd" opacity="0.2"/>
-      <rect x="4" y="2" width="16" height="20" rx="2" stroke="#8be9fd" strokeWidth="1.5"/>
-      <path d="M7 7h10M7 11h10M7 15h6" stroke="#8be9fd" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  );
-
-  // default file
-  return (
-    <svg viewBox="0 0 24 24" width="48" height="48" fill="none">
-      <path d="M4 2h10l6 6v14a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2z" fill="#aaa" opacity="0.2"/>
-      <path d="M4 2h10l6 6v14a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2z" stroke="#aaa" strokeWidth="1.5"/>
-      <path d="M14 2v6h6" stroke="#aaa" strokeWidth="1.5"/>
-    </svg>
-  );
+  setContextMenu((p) => ({ ...p, visible: false }));
 }
 
-  
+  function getIcon(item) {
+    if (item.type === "folder")
+      return (
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none">
+          <path
+            d="M2 6a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+            fill="#ffb86c"
+          />
+          <path d="M2 9h20v8a2 2 0 01-2 2H4a2 2 0 01-2-2V9z" fill="#ffd09b" />
+        </svg>
+      );
+
+    const ext = item.name?.split(".").pop().toLowerCase();
+
+    if (["png", "jpg", "jpeg", "gif", "webp"].includes(ext))
+      return (
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none">
+          <rect
+            x="2"
+            y="2"
+            width="20"
+            height="20"
+            rx="3"
+            fill="#50fa7b"
+            opacity="0.2"
+          />
+          <rect
+            x="2"
+            y="2"
+            width="20"
+            height="20"
+            rx="3"
+            stroke="#50fa7b"
+            strokeWidth="1.5"
+          />
+          <circle cx="8.5" cy="8.5" r="1.5" fill="#50fa7b" />
+          <path
+            d="M2 15l5-5 4 4 3-3 5 5"
+            stroke="#50fa7b"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+        </svg>
+      );
+
+    if (ext === "txt")
+      return (
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none">
+          <rect
+            x="4"
+            y="2"
+            width="16"
+            height="20"
+            rx="2"
+            fill="#8be9fd"
+            opacity="0.2"
+          />
+          <rect
+            x="4"
+            y="2"
+            width="16"
+            height="20"
+            rx="2"
+            stroke="#8be9fd"
+            strokeWidth="1.5"
+          />
+          <path
+            d="M7 7h10M7 11h10M7 15h6"
+            stroke="#8be9fd"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+        </svg>
+      );
+
+    // default file
+    return (
+      <svg viewBox="0 0 24 24" width="48" height="48" fill="none">
+        <path
+          d="M4 2h10l6 6v14a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2z"
+          fill="#aaa"
+          opacity="0.2"
+        />
+        <path
+          d="M4 2h10l6 6v14a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2z"
+          stroke="#aaa"
+          strokeWidth="1.5"
+        />
+        <path d="M14 2v6h6" stroke="#aaa" strokeWidth="1.5" />
+      </svg>
+    );
+  }
+
   // ==========================
   // OPEN APP
   // ==========================
@@ -284,7 +354,9 @@ function getIcon(item) {
         <div
           className="main-area"
           onClick={() => setSelectedApp(null)}
-           style={{ backgroundImage: wallpaper ? `url('${wallpaper}')` : "none" }}
+          style={{
+            backgroundImage: wallpaper ? `url('${wallpaper}')` : "none",
+          }}
           onContextMenu={(e) => {
             e.preventDefault();
 
@@ -306,7 +378,10 @@ function getIcon(item) {
                 }}
                 key={key}
                 className={`ico-box ${selectedApp === item.name ? "selected" : ""}`}
-                onMouseDown={(e) => { e.stopPropagation(); handleDragStart(e, item.name); }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  handleDragStart(e, item.name);
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedApp(item.name);
@@ -370,27 +445,12 @@ function getIcon(item) {
 
             <div
               className="context-item"
-              onMouseEnter={() =>
-                setContextMenu((p) => ({ ...p, submenu: "new" }))
-              }
-              onMouseLeave={() =>
-                setContextMenu((p) => ({ ...p, submenu: null }))
-              }
+              onClick={(e) => {
+                e.stopPropagation();
+                createFolder();
+              }}
             >
-              New ▶
-              {contextMenu.submenu === "new" && (
-                <div className="context-submenu">
-                  <div
-                    className="context-item"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      createFolder();
-                    }}
-                  >
-                    Folder
-                  </div>
-                </div>
-              )}
+              New Folder
             </div>
 
             <div className="context-item">Personalize</div>

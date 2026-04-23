@@ -1,0 +1,40 @@
+.boot-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
+  background: #000;
+  z-index: 999999; /* VERY IMPORTANT */
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+}
+
+.boot-logo {
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.6; transform: scale(0.95); }
+}
+
+.boot-bar {
+  width: 200px;
+  height: 4px;
+  background: #222;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.boot-progress {
+  height: 100%;
+  background: white;
+  transition: width 0.1s linear;
+}
